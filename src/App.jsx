@@ -278,7 +278,6 @@ function App() {
           </div>
 
           <div style={{ marginTop: '20px' }}>
-            <h3>売上・原価グラフ</h3>
             <div style={{ fontSize: '20px', fontWeight: 'bold' }}>
               {price} <span style={{ fontSize: '12px' }}>円</span>
               <input type="range" min="120" max="500" step="10" value={price} onChange={(e) => setPrice(Number(e.target.value))} style={{ width: '200px', cursor: 'pointer' }} />
