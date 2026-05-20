@@ -177,6 +177,37 @@ function App() {
     ]
   };
 
+
+  // 各杯数ごとの原価計算ロジックを流用して、損益分岐点を探索
+  let breakEvenCups = null;
+  for (let cups = cupRange[0]; cups <= cupRange[1]; cups++) {
+    const revenue = cups * price;
+    
+    // 原価の計算
+    const cupPack = Math.ceil(cups / materials[0].constant);
+    const lidPack = Math.ceil(cups / materials[1].constant);
+    const strawPack = Math.ceil(cups / materials[2].constant);
+    const syrupPack = Math.ceil((cups * syrupPerCup) / items[0].constant);
+    const sodaPack = Math.ceil((cups * sodaPerCup) / items[1].constant);
+    const colorPack = Math.ceil((cups * colorPerCup) / items[2].constant);
+    const icePack = Math.ceil((cups * icePerCup) / items[3].constant);
+
+    const totalCost = settings.freezerRental +
+      (cupPack * materials[0].price) +
+      (lidPack * materials[1].price) +
+      (strawPack * materials[2].price) +
+      (syrupPack * items[0].price) +
+      (sodaPack * items[1].price) +
+      (colorPack * items[2].price) +
+      (icePack * items[3].price);
+
+    // 売上が原価を超えた瞬間を記録してループを抜ける
+    if (revenue >= totalCost && cups > 0) {
+      breakEvenCups = cups;
+      break;
+    }
+  }
+
   const chartOptions = {
     responsive: true,
     plugins: {
@@ -272,6 +303,30 @@ function App() {
           {cupRange[0]} <span style={{ fontSize: '12px' }}>杯</span> - {cupRange[1]} <span style={{ fontSize: '12px' }}>杯</span>
         </div>
         <Slider range min={0} max={1600} step={50} value={cupRange} onChange={(value) => setCupRange(value)} />
+      </div>
+
+      <div style={{ 
+        width: '100%', 
+        maxWidth: '800px', 
+        margin: '20px auto', 
+        padding: '15px', 
+        backgroundColor: breakEvenCups ? '#e6f4ea' : '#fce8e6', 
+        borderRadius: '8px', 
+        textAlign: 'center',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+      }}>
+        {breakEvenCups ? (
+          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#137333' }}>
+            損益分岐点: <span style={{ fontSize: '24px' }}>{breakEvenCups}</span> 杯 
+            <span style={{ fontSize: '14px', fontWeight: 'normal', marginLeft: '10px', color: '#555' }}>
+              (総売上: {(breakEvenCups * price).toLocaleString()}円 以上で黒字化)
+            </span>
+          </div>
+        ) : (
+          <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#c5221f' }}>
+            ⚠️ 現在の設定では、表示範囲内に損益分岐点がありません（単価を上げるか、表示範囲を広げてください）
+          </div>
+        )}
       </div>
 
       <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', margin: '0 auto' }}>
